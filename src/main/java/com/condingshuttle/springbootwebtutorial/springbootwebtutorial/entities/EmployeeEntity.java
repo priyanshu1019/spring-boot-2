@@ -30,5 +30,7 @@ public class EmployeeEntity {
     @JsonProperty("isActive")
     private Boolean isActive;
     private Integer age;
+    private String role;
     private LocalDate dateOfJoining;
+    private Double Salary;
 }

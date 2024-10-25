@@ -1,8 +1,8 @@
 package com.condingshuttle.springbootwebtutorial.springbootwebtutorial.controllers;
 
 import com.condingshuttle.springbootwebtutorial.springbootwebtutorial.dto.EmployeeDTO;
-import com.condingshuttle.springbootwebtutorial.springbootwebtutorial.entities.EmployeeEntity;
 import com.condingshuttle.springbootwebtutorial.springbootwebtutorial.services.EmployeeService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +26,7 @@ public class EmployeeController {
     //path is basically the route
     @GetMapping(path = "/{employeeId}")//pathvariable is mandatory to pass
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable(name = "employeeId") Long id){//this pathvariable annotation will basically inject that okay employee comes from path
+
         Optional<EmployeeDTO> employeeDTO = employeeService.getEmployeeById(id);
         return employeeDTO.map(employeeDTO1 -> ResponseEntity.ok(employeeDTO1))
                 .orElse(ResponseEntity.notFound().build());
@@ -35,14 +36,14 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
-    @PostMapping
-    public ResponseEntity<EmployeeDTO> postEmployee(@RequestBody EmployeeDTO newEmployee){
+    @PostMapping                                                 //first it will validate this employeeDTO then go to first
+    public ResponseEntity<EmployeeDTO> postEmployee(@RequestBody @Valid EmployeeDTO newEmployee){
 
         EmployeeDTO employeeDTO =  employeeService.postEmployee(newEmployee);
         return new ResponseEntity<>(employeeDTO , HttpStatus.CREATED);
     }
     @PutMapping(path = "/{employeeId}")
-    public ResponseEntity<EmployeeDTO> putEmployee(@RequestBody EmployeeDTO employeeDTO , @PathVariable Long employeeId){
+    public ResponseEntity<EmployeeDTO> putEmployee(@RequestBody @Valid EmployeeDTO employeeDTO , @PathVariable Long employeeId){
         return ResponseEntity.ok(employeeService.updateEmployeebyId(employeeId , employeeDTO));
     }
     @DeleteMapping(path = "/{employeeId}")
