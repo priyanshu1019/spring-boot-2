@@ -15,30 +15,32 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiError> resourceNotFound(ResourceNotFoundException exception){
+    public ResponseEntity<ApiResponse<?>> resourceNotFound(ResourceNotFoundException exception){
 
         ApiError apiError = ApiError.builder()
                             .status(HttpStatus.NOT_FOUND)
                             .message(exception.getMessage())
                             .build();
 
-        return new ResponseEntity<>(apiError , HttpStatus.NOT_FOUND);
+        return buildErrorResponseEntity(apiError);
 
     }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleInternalServerError(Exception exception){
+    public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exception){
 
         ApiError apiError = ApiError.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .message(exception.getMessage())
                             .build();
 
-        return new ResponseEntity<>(apiError , HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildErrorResponseEntity(apiError);
 
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidationError(MethodArgumentNotValidException exception){
+    public ResponseEntity<ApiResponse<?>> handleValidationError(MethodArgumentNotValidException exception){
         List<String> errors = exception
                             .getBindingResult()
                             .getAllErrors()
@@ -47,11 +49,16 @@ public class GlobalExceptionHandler {
                             .collect(Collectors.toList());
 
         ApiError apiError = ApiError.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .message("Validation errors encountered")
-                .subErrors(errors)
-                .build();
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .message("Validation errors encountered")
+                            .subErrors(errors)
+                            .build();
 
-        return new ResponseEntity<>(apiError , HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildErrorResponseEntity(apiError);
     }
+
+    private ResponseEntity<ApiResponse<?>> buildErrorResponseEntity(ApiError apiError) {
+        return new ResponseEntity<>(new ApiResponse<>(apiError) , apiError.getStatus());
+    }
+
 }
