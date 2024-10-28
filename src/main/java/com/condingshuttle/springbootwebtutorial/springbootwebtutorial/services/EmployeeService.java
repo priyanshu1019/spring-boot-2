@@ -25,9 +25,9 @@ public class EmployeeService {
         this.modelMapper = modelMapper;
     }
 
-
     public Optional<EmployeeDTO> getEmployeeById(Long id) {
-        return employeeRepository.findById(id).map(employeeEntity -> modelMapper.map(employeeEntity, EmployeeDTO.class));
+        return employeeRepository.findById(id)
+                .map(employeeEntity -> modelMapper.map(employeeEntity, EmployeeDTO.class));
 
     }
 
@@ -35,34 +35,28 @@ public class EmployeeService {
         List<EmployeeEntity> employeeEntityList = employeeRepository.findAll();
         return employeeEntityList
                 .stream()
-                .map(employeeEntity -> modelMapper.map(employeeEntity , EmployeeDTO.class))
+                .map(employeeEntity -> modelMapper.map(employeeEntity, EmployeeDTO.class))
                 .collect(Collectors.toList());
     }
 
     public EmployeeDTO postEmployee(EmployeeDTO newEmployee) {
 
-        EmployeeEntity employeeEntity = modelMapper.map(newEmployee , EmployeeEntity.class);
-        EmployeeEntity savedEmployee  = employeeRepository.save(employeeEntity);
+        EmployeeEntity employeeEntity = modelMapper.map(newEmployee, EmployeeEntity.class);
+        EmployeeEntity savedEmployee = employeeRepository.save(employeeEntity);
 
-        return modelMapper.map(savedEmployee , EmployeeDTO.class);
+        return modelMapper.map(savedEmployee, EmployeeDTO.class);
 
     }
 
-    public boolean isExistsById(Long id){
-
-        boolean exists =  employeeRepository.existsById(id);
-        if(!exists) throw new ResourceNotFoundException("Employee does not exists with id: "+id);
-
-        return true;
-    }
     public EmployeeDTO updateEmployeebyId(Long employeeId, EmployeeDTO employeeDTO) {
 
         isExistsById(employeeId);
-        EmployeeEntity employeeEntity = modelMapper.map(employeeDTO , EmployeeEntity.class);
+        EmployeeEntity employeeEntity = modelMapper.map(employeeDTO, EmployeeEntity.class);
         employeeEntity.setId(employeeId);
-        return modelMapper.map(employeeRepository.save(employeeEntity) , EmployeeDTO.class);
+        return modelMapper.map(employeeRepository.save(employeeEntity), EmployeeDTO.class);
 
     }
+
     public boolean deleteById(Long employeeId) {
 
         isExistsById(employeeId);
@@ -75,12 +69,21 @@ public class EmployeeService {
 
         isExistsById(employeeId);
         EmployeeEntity employeeEntity = employeeRepository.findById(employeeId).get();
-        updates.forEach((field , value)->{
-            Field fieldToBeUpdated = ReflectionUtils.findRequiredField(EmployeeEntity.class , field);
+        updates.forEach((field, value) -> {
+            Field fieldToBeUpdated = ReflectionUtils.findRequiredField(EmployeeEntity.class, field);
             fieldToBeUpdated.setAccessible(true);
-            ReflectionUtils.setField(fieldToBeUpdated , employeeEntity , value);
+            ReflectionUtils.setField(fieldToBeUpdated, employeeEntity, value);
         });
-        return modelMapper.map(employeeRepository.save(employeeEntity) , EmployeeDTO.class);
+        return modelMapper.map(employeeRepository.save(employeeEntity), EmployeeDTO.class);
 
+    }
+
+    public boolean isExistsById(Long id) {
+
+        boolean exists = employeeRepository.existsById(id);
+        if (!exists)
+            throw new ResourceNotFoundException("Employee does not exists with id: " + id);
+
+        return true;
     }
 }
